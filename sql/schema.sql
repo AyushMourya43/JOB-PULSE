@@ -17,6 +17,12 @@ CREATE TABLE jobs (
 
     title VARCHAR(255) NOT NULL,
 
+    -- Adzuna truncates every description at 500 characters
+    description TEXT,
+
+    -- Link to the original posting (powers the "Apply" button)
+    redirect_url TEXT,
+
     company_id INTEGER REFERENCES companies(company_id),
 
     location VARCHAR(255),
@@ -24,9 +30,16 @@ CREATE TABLE jobs (
     salary_min NUMERIC,
     salary_max NUMERIC,
 
+    -- TRUE = Adzuna's own estimate, not employer-confirmed
     salary_is_predicted BOOLEAN,
 
     posted_date DATE,
+
+    -- full_time / part_time
+    contract_time VARCHAR(20),
+
+    -- Adzuna category label, e.g. "IT Jobs"
+    category VARCHAR(100),
 
     -- Which search term found this job
     search_role VARCHAR(100),

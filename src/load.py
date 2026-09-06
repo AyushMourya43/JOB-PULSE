@@ -91,11 +91,17 @@ def get_job_id(
     conn,
     external_id,
     title,
+    description,
+    redirect_url,
     company_id,
     location,
     salary_min,
     salary_max,
-    posted_date
+    salary_is_predicted,
+    posted_date,
+    contract_time,
+    category,
+    search_role
 ):  # sixth it will execute=-
 
     cur = conn.cursor()
@@ -106,25 +112,37 @@ def get_job_id(
         (
             external_id,
             title,
+            description,
+            redirect_url,
             company_id,
             location,
             salary_min,
             salary_max,
+            salary_is_predicted,
             posted_date,
+            contract_time,
+            category,
+            search_role,
             source
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 
         ON CONFLICT (external_id) DO NOTHING
         """,
         (
             external_id,
             title,
+            description,
+            redirect_url,
             company_id,
             location,
             salary_min,
             salary_max,
+            salary_is_predicted,
             posted_date,
+            contract_time,
+            category,
+            search_role,
             "adzuna"
         )
     )
@@ -201,11 +219,19 @@ def load_dataframe(conn, df): # third it will execute
             conn,
             external_id=str(clean_value(row.get("id"))),
             title=clean_value(row.get("title")),
+            description=clean_value(row.get("description")),
+            redirect_url=clean_value(row.get("redirect_url")),
             company_id=company_id,
             location=clean_value(row.get("location_name")),
             salary_min=clean_value(row.get("salary_min")),
             salary_max=clean_value(row.get("salary_max")),
-            posted_date=posted_date
+            # numpy.bool_ ko Python bool banana zaroori hai —
+            # psycopg2 numpy.bool_ ko adapt nahi kar sakta
+            salary_is_predicted=bool(row.get("salary_is_predicted", False)),
+            posted_date=posted_date,
+            contract_time=clean_value(row.get("contract_time")),
+            category=clean_value(row.get("category")),
+            search_role=clean_value(row.get("search_role"))
         )
 
         # -------------------------
