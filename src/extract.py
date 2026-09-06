@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+from datetime import datetime, timezone
 import requests
 from src import logger
 from config.settings import (
@@ -24,7 +25,7 @@ def fetch_jobs(what, where="", country="in", results_per_page=50, max_pages=8):
         for page in range(1, max_pages + 1):
             url = f"{ADZUNA_BASE_URL}/{country}/search/{page}"
 
-            # what exaclty i need from the api
+            # exactly what we need from the API
             params = {
                 "app_id": ADZUNA_APP_ID,
                 "app_key": ADZUNA_APP_KEY,
@@ -78,19 +79,27 @@ def fetch_jobs(what, where="", country="in", results_per_page=50, max_pages=8):
                 logging.error(f"Skipping page {page} after 3 failed retries.")
                 continue
 
-            time.sleep(1.5)   # rate limit (25 hits/min) s
+            time.sleep(1.5)   # rate limit (25 hits/min)
 
         logging.info(f"Data fetched successfully — {len(all_results)} total jobs.\n")
 
         RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
         safe_query = what.replace(" ", "_").lower()
 
+        # One payload object, written to disk and returned, so the file
+        # and the return value can never drift apart
+        payload = {
+            "search_role": what,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "results": all_results,
+        }
+
         with open(
-            RAW_DATA_DIR / f"jobs_raw_{safe_query}.json", "w",encoding="utf-8") as file:
+            RAW_DATA_DIR / f"jobs_raw_{safe_query}.json", "w", encoding="utf-8") as file:
 
-            json.dump({"results": all_results}, file,indent=2,ensure_ascii=False)
+            json.dump(payload, file, indent=2, ensure_ascii=False)
 
-        return {"results": all_results}
+        return payload
 
     except requests.exceptions.Timeout:
         logging.error("Request timed out.")

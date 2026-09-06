@@ -102,7 +102,7 @@ def get_job_id(
     contract_time,
     category,
     search_role
-):  # sixth it will execute=-
+):  # sixth it will execute
 
     cur = conn.cursor()
 
@@ -225,8 +225,9 @@ def load_dataframe(conn, df): # third it will execute
             location=clean_value(row.get("location_name")),
             salary_min=clean_value(row.get("salary_min")),
             salary_max=clean_value(row.get("salary_max")),
-            # numpy.bool_ ko Python bool banana zaroori hai —
-            # psycopg2 numpy.bool_ ko adapt nahi kar sakta
+            # must be a real Python bool: psycopg2 cannot adapt numpy.bool_
+            # (numpy.float64 works because it subclasses float; numpy.bool_
+            # does not subclass bool)
             salary_is_predicted=bool(row.get("salary_is_predicted", False)),
             posted_date=posted_date,
             contract_time=clean_value(row.get("contract_time")),

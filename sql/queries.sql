@@ -1,7 +1,7 @@
--- Query 1: Top 10 skills overall (saare roles milaake)
--- job_skills ko skills se JOIN karke skill_id ki jagah asli naam nikala,
--- phir har skill kitni jobs mein hai wo count karke sabse zyada demand
--- wali skills upar dikhayi (FR4 — "Top N skills overall")
+-- Query 1: Top 10 skills overall (across every role)
+-- Joins job_skills to skills to turn skill_id into the actual skill name,
+-- then counts how many jobs mention each skill so the most in-demand ones
+-- come first. (FR4 — "Top N skills overall")
 SELECT s.skill_name, COUNT(*) AS job_count
 FROM job_skills js
 JOIN skills s ON js.skill_id = s.skill_id
@@ -9,9 +9,9 @@ GROUP BY s.skill_name
 ORDER BY job_count DESC
 LIMIT 10;
 
--- Query 2: Top 10 skills sirf ek specific role ke liye (yaha "Data Engineer")
--- Query 1 jaisi hi hai, bas ek extra JOIN (jobs table se) aur WHERE filter
--- add kiya taaki sirf us role ki jobs ka data count ho
+-- Query 2: Top 10 skills for one specific role (here "Data Engineer")
+-- Same shape as Query 1, plus one extra JOIN (to the jobs table) and a
+-- WHERE filter so only that role's jobs are counted.
 -- (FR4 — "Top N skills by role")
 SELECT s.skill_name, COUNT(*) AS job_count
 FROM job_skills js
@@ -22,10 +22,12 @@ GROUP BY s.skill_name
 ORDER BY job_count DESC
 LIMIT 10;
 
--- Query 3: Location ke hisaab se average salary
--- WHERE salary_min IS NOT NULL zaroori hai kyunki kaafi jobs mein salary
--- data hi missing hai — isse sirf wahi locations dikhengi jaha kam se kam
--- kuch salary data available hai (FR4 — "Average/min/max salary by location")
+-- Query 3: Average salary by location
+-- The WHERE salary_min IS NOT NULL filter is required because many postings
+-- have no salary data at all — without it the averages would be computed
+-- over a mix of real and missing values. This returns only locations that
+-- have at least some salary data.
+-- (FR4 — "Average/min/max salary by location")
 SELECT location,
        COUNT(*) AS job_count,
        ROUND(AVG(salary_min)) AS avg_salary_min,
@@ -36,10 +38,10 @@ GROUP BY location
 ORDER BY job_count DESC
 LIMIT 10;
 
--- Query 4: Skill co-occurrence — kaunsi do skills sabse zyada saath mein
--- (same job posting mein) aati hain. Self-join use kiya job_skills table
--- pe — job_id match karke same job ki skill-pairs nikali, aur
--- skill_id < skill_id condition se duplicate/self-pairs hatai
+-- Query 4: Skill co-occurrence — which two skills appear together most often
+-- in the same job posting. Uses a self-join on job_skills: matching on
+-- job_id pairs up the skills of the same job, and the skill_id < skill_id
+-- condition removes self-pairs and mirrored duplicates.
 -- (FR4 — "Skills that most often appear together in the same posting")
 SELECT s1.skill_name AS skill_1, s2.skill_name AS skill_2, COUNT(*) AS pair_count
 FROM job_skills js1
@@ -49,9 +51,9 @@ JOIN skills s2 ON js2.skill_id = s2.skill_id
 GROUP BY s1.skill_name, s2.skill_name
 ORDER BY pair_count DESC
 LIMIT 10;
- 
 
--- this is csv data  
+-- Flat export used to build the CSV (one row per job-skill pair, plus one
+-- row for jobs that matched no skill).
 SELECT
     j.job_id,
     j.title,

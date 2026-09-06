@@ -1,5 +1,6 @@
 import json
 import re
+import hashlib
 import logging
 from pathlib import Path
 import pandas as pd
@@ -20,6 +21,23 @@ KNOWN_SKILLS = [
     "Presentation", "Project Management",
 ]
 
+# job_hash is built from these fields only — they are the job's content.
+# search_role and fetched_at are deliberately excluded: they are the
+# pipeline's own metadata, and including them would report false
+# "changes" on every run (197 jobs are found under two search terms).
+HASH_FIELDS = [
+    "title",
+    "description",
+    "company_name",
+    "location_name",
+    "salary_min",
+    "salary_max",
+    "salary_is_predicted",
+    "contract_time",
+    "category",
+    "created",
+]
+
 
 # JSON file load
 def load_raw_data(filepath):  # second execute this
@@ -30,8 +48,8 @@ def load_raw_data(filepath):  # second execute this
     with open(filepath, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    # naye raw files mein search_role hota hai.
-    # purani files (v1 format) mein nahi — unke liye filename se nikaal lo
+    # New raw files carry search_role. Old (v1 format) files do not,
+    # so derive it from the filename for those.
     search_role = data.get("search_role")
 
     if not search_role:
@@ -58,7 +76,7 @@ def load_raw_data(filepath):  # second execute this
     return df
 
 
-# Duplicate jobs REMOVE
+# remove duplicate jobs
 def remove_duplicates(df):  # third execute this
 
     if "id" in df.columns:
@@ -68,14 +86,14 @@ def remove_duplicates(df):  # third execute this
     return df
 
 
-# convert Salary columns into  numberic 
+# convert salary columns into numeric
 def normalize_salary(df):  # fourth execute this
     df["salary_min"] = pd.to_numeric(df.get("salary_min"), errors="coerce")
     df["salary_max"] = pd.to_numeric(df.get("salary_max"), errors="coerce")
 
-    # Adzuna 'salary_is_predicted' ko STRING mein bhejta hai ("0" / "1"),
-    # number mein nahi. Python mein bool("0") == True hota hai, isliye
-    # seedha bool() lagana silent bug banata hai — explicitly "1" se compare karo.
+    # Adzuna sends 'salary_is_predicted' as a STRING ("0" / "1"), not a
+    # number. In Python bool("0") is True, so calling bool() directly is a
+    # silent bug — compare against "1" explicitly instead.
     if "salary_is_predicted" in df.columns:
         df["salary_is_predicted"] = (
             df["salary_is_predicted"].astype(str).str.strip() == "1"
@@ -84,6 +102,34 @@ def normalize_salary(df):  # fourth execute this
         logging.warning("'salary_is_predicted' column not found — defaulting to False.")
         df["salary_is_predicted"] = False
 
+    return df
+
+
+# SHA-256 of a job's content, used for change detection
+def compute_job_hash(row):
+
+    payload = {}
+
+    for field in HASH_FIELDS:
+        value = row.get(field)
+
+        # NaN is not equal to itself, so normalise every missing value to
+        # the same placeholder ("") before hashing — otherwise the same job
+        # would produce a different hash on every run
+        if value is None or pd.isna(value):
+            payload[field] = ""
+        else:
+            payload[field] = str(value)
+
+    # sort_keys=True is required: dict ordering can change, but the hash
+    # must stay identical for identical content
+    canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False)
+
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def add_job_hash(df):
+    df["job_hash"] = df.apply(compute_job_hash, axis=1)
     return df
 
 
@@ -97,12 +143,12 @@ def extract_skills(description):  # sixth execute this
     for skill in KNOWN_SKILLS:
         pattern = r'\b' + re.escape(skill.lower()) + r'\b'
         if re.search(pattern, description.lower()):
-            skills.append(skill)  # not store in lower case 
+            skills.append(skill)  # keep original casing, not lowercase
 
     return skills
 
 
-# all cleaning 
+# all cleaning steps
 def clean_jobs(filepath):  # 1FIRST execute this
     df = load_raw_data(filepath)
 
@@ -114,6 +160,9 @@ def clean_jobs(filepath):  # 1FIRST execute this
 
     if "description" in df.columns:
         df["skills"] = df["description"].apply(extract_skills)  # fifth execute this
+
+    # hash last, once salary has already been normalised to numeric
+    df = add_job_hash(df)
 
     logging.info("Cleaning completed!")
     return df
@@ -127,15 +176,15 @@ if __name__ == "__main__":
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", None)
 
+    df["hash"] = df["job_hash"].str[:12]
+
     print(df[
         [
             "title",
             "company_name",
             "search_role",
             "category",
-            "contract_time",
-            "salary_min",
             "salary_is_predicted",
-            "skills"
+            "hash"
         ]
     ].head())
