@@ -1,0 +1,37 @@
+{
+    "tech": [
+      "data engineer",
+      "data analyst",
+      "data scientist",
+      "backend developer",
+      "frontend developer",
+      "full stack developer",
+      "devops engineer",
+      "machine learning engineer",
+      "software engineer",
+      "cloud engineer",
+      "android developer",
+      "ios developer",
+      "qa engineer",
+      "database administrator",
+      "network engineer",
+      "system administrator",
+      "ui ux designer",
+      "cybersecurity engineer",
+      "site reliability engineer",
+      "ai engineer"
+    ],
+    "non_tech": [
+      "hr manager",
+      "marketing manager",
+      "sales executive",
+      "accountant",
+      "finance analyst",
+      "operations manager",
+      "content writer",
+      "digital marketing specialist",
+      "customer support executive",
+      "recruiter"
+    ]
+  }
+  

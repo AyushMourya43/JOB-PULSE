@@ -70,10 +70,22 @@ CREATE TABLE pipeline_runs (
     started_at TIMESTAMP NOT NULL,
     finished_at TIMESTAMP,
 
+    -- running / success / failed
     status VARCHAR(20),
 
     jobs_fetched INTEGER DEFAULT 0,
     jobs_inserted INTEGER DEFAULT 0,
     jobs_updated INTEGER DEFAULT 0,
-    jobs_failed INTEGER DEFAULT 0
+
+    -- content was identical, so nothing was written
+    jobs_unchanged INTEGER DEFAULT 0,
+
+    -- deliberately not loaded (e.g. no company name)
+    jobs_skipped INTEGER DEFAULT 0,
+
+    -- an actual error, as opposed to a skip
+    jobs_failed INTEGER DEFAULT 0,
+
+    -- why the run failed, so status='failed' is self-explanatory
+    error_message TEXT
 );
