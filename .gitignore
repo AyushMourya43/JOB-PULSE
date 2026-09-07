@@ -7,3 +7,4 @@ data/processed/
 logs/
 .DS_Store
 jobpulse_backup.sql
+site/

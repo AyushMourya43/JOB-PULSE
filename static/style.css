@@ -1,0 +1,614 @@
+/* ---------------------------------------------------------------
+   Tokens.
+
+   Light is the default; dark is a parallel set of pages that stamp
+   data-theme="dark", so the theme survives navigation with no
+   JavaScript to remember it.
+
+   The categorical slots (--c1..--c6) are a fixed, colour-vision-safe
+   order. They are used only where the data really is categorical —
+   the job-category split. Magnitude charts (skills, cities) stay on a
+   single hue, because there the colour would carry no meaning.
+   --------------------------------------------------------------- */
+
+   :root {
+    --plane:         #f4f6f8;
+    --surface:       #ffffff;
+    --surface-2:     #f1f3f6;
+    --sidebar:       #171a1f;
+    --sidebar-ink:   #e7eaee;
+    --sidebar-ink-2: #939ba7;
+    --sidebar-hover: #22262d;
+    --ink:           #0d1117;
+    --ink-2:         #4a5260;
+    --ink-3:         #8b93a1;
+    --border:        rgba(13, 17, 23, 0.09);
+    --border-strong: rgba(13, 17, 23, 0.16);
+    --track:         #e6e9ee;
+    --series:        #2a78d6;
+    --series-glow:   rgba(42, 120, 214, 0.16);
+    --shadow:        0 1px 2px rgba(13, 17, 23, 0.05),
+                     0 10px 26px -14px rgba(13, 17, 23, 0.16);
+    --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a;
+    --c4: #eda100; --c5: #e87ba4; --c6: #008300;
+    --radius: 14px;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: light;
+  }
+  
+  :root[data-theme="dark"] {
+    --plane:         #0b0c0e;
+    --surface:       #14171b;
+    --surface-2:     #1b1f25;
+    --sidebar:       #101317;
+    --sidebar-ink:   #e7eaee;
+    --sidebar-ink-2: #7f8794;
+    --sidebar-hover: #1c2027;
+    --ink:           #f2f4f7;
+    --ink-2:         #a8b0bd;
+    --ink-3:         #6e7783;
+    --border:        rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.15);
+    --track:         #242931;
+    --series:        #3987e5;
+    --series-glow:   rgba(57, 135, 229, 0.18);
+    --shadow:        0 1px 2px rgba(0, 0, 0, 0.4),
+                     0 12px 32px -16px rgba(0, 0, 0, 0.7);
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70;
+    --c4: #c98500; --c5: #d55181; --c6: #008300;
+    color-scheme: dark;
+  }
+  
+  * { box-sizing: border-box; }
+  
+  html { -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; }
+  
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    background: var(--plane);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  
+  a { color: var(--series); }
+  
+  /* ---------------- shell ---------------- */
+  
+  .shell {
+    display: grid;
+    grid-template-columns: 238px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+  
+  /* ---------------- sidebar ---------------- */
+  
+  .sidebar {
+    background: var(--sidebar);
+    color: var(--sidebar-ink);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  
+  .sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 22px 20px;
+    font-size: 16.5px;
+    font-weight: 640;
+    letter-spacing: -0.02em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  
+  .sidebar .brand .mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--series);
+    box-shadow: 0 0 0 4px var(--series-glow);
+    flex: none;
+  }
+  
+  .sidebar .brand small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--sidebar-ink-2);
+    letter-spacing: 0;
+  }
+  
+  .side-nav { padding: 14px 12px; display: grid; gap: 2px; }
+  
+  .side-nav a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    color: var(--sidebar-ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+  }
+  
+  .side-nav a svg { width: 17px; height: 17px; flex: none; }
+  
+  .side-nav a:hover { background: var(--sidebar-hover); color: var(--sidebar-ink); }
+  
+  .side-nav a.active {
+    background: var(--sidebar-hover);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 2px 0 0 var(--series);
+  }
+  
+  .side-foot {
+    margin-top: auto;
+    padding: 14px 12px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    color: var(--sidebar-ink-2);
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  
+  .theme-toggle:hover { border-color: var(--series); color: #fff; }
+  .theme-toggle svg { width: 15px; height: 15px; }
+  
+  /* ---------------- content ---------------- */
+  
+  .content { min-width: 0; display: flex; flex-direction: column; }
+  
+  /* The page title in the topbar is the page's identity, so it carries
+     real weight. Large headings need tighter tracking than body text —
+     default spacing looks scattered at this size. */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  
+  .topbar h1 {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 670;
+    letter-spacing: -0.032em;
+    line-height: 1.2;
+  }
+  
+  .topbar .stamp {
+    margin-left: auto;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  main { padding: 24px 28px 56px; }
+  
+  .lede {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    max-width: 74ch;
+    margin: 0 0 22px;
+  }
+  
+  section { margin-top: 18px; }
+  
+  /* ---------------- cards ---------------- */
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+  }
+  
+  .col-4  { grid-column: span 4; }
+  .col-5  { grid-column: span 5; }
+  .col-6  { grid-column: span 6; }
+  .col-7  { grid-column: span 7; }
+  .col-8  { grid-column: span 8; }
+  .col-12 { grid-column: span 12; }
+  
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    min-width: 0;
+  }
+  
+  .card h2 {
+    font-size: 15px;
+    font-weight: 620;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  
+  .card .sub {
+    color: var(--ink-3);
+    font-size: 12.5px;
+    margin: 3px 0 18px;
+  }
+  
+  /* legacy two-column helper */
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+    gap: 16px;
+  }
+  
+  .page-head { margin-bottom: 18px; }
+  .page-head h1 { font-size: 22px; font-weight: 650; letter-spacing: -0.025em; margin: 0 0 5px; }
+  .page-head p { margin: 0; color: var(--ink-2); font-size: 14.5px; max-width: 70ch; }
+  
+  /* ---------------- stat tiles ---------------- */
+  
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(158px, 100%), 1fr));
+    gap: 14px;
+  }
+  
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .kpi::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--series), transparent 72%);
+  }
+  
+  .kpi .value {
+    font-size: 30px;
+    font-weight: 660;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+  
+  .kpi .label {
+    color: var(--ink-3);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 7px;
+  }
+  
+  /* ---------------- horizontal bars (single hue) ---------------- */
+  
+  .bars { display: grid; gap: 9px; }
+  
+  .bar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 126px) minmax(0, 1fr) minmax(0, 54px);
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .bar-label {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .bar-track { background: var(--track); border-radius: 4px; height: 15px; overflow: hidden; }
+  
+  .bar-fill {
+    display: block;
+    height: 100%;
+    width: var(--w);
+    min-width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--series) 76%, transparent), var(--series));
+  }
+  
+  .bar-value {
+    font-size: 12.5px;
+    font-weight: 550;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    text-align: right;
+  }
+  
+  /* ---------------- vertical bars ---------------- */
+  
+  .vbars {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 190px;
+    padding-top: 22px;
+  }
+  
+  .vbar {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  
+  .vbar .cap {
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  
+  .vbar .fill {
+    height: var(--h);
+    min-height: 3px;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, var(--series),
+      color-mix(in srgb, var(--series) 66%, transparent));
+  }
+  
+  .vbar .name {
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: center;
+    margin-top: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* ---------------- donut ----------------
+     conic-gradient draws the whole ring; the inner disc is a pseudo
+     element, so there is no chart library and no script.
+     ------------------------------------------------ */
+  
+  .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  
+  .donut {
+    position: relative;
+    width: 138px;
+    height: 138px;
+    flex: none;
+    border-radius: 50%;
+    background: conic-gradient(var(--stops));
+  }
+  
+  .donut::after {
+    content: "";
+    position: absolute;
+    inset: 26px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+  
+  .donut .center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    z-index: 1;
+  }
+  
+  .donut .center b {
+    display: block;
+    font-size: 24px;
+    font-weight: 660;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  
+  .donut .center span {
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  
+  .legend { display: grid; gap: 8px; min-width: 0; flex: 1 1 190px; }
+  
+  .legend div { display: flex; align-items: center; gap: 9px; font-size: 12.5px; min-width: 0; }
+  
+  .legend i { width: 10px; height: 10px; border-radius: 3px; flex: none; background: var(--dot); }
+  
+  .legend .nm { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend .vl { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 550; }
+  
+  /* ---------------- tables ---------------- */
+  
+  .table-wrap { overflow-x: auto; margin: 0 -22px -20px; padding: 0 6px; -webkit-overflow-scrolling: touch; }
+  
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 380px; }
+  
+  th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border-strong);
+    white-space: nowrap;
+  }
+  
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-2); }
+  
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.strong { font-weight: 550; }
+  
+  /* ---------------- pills ---------------- */
+  
+  .pills { display: flex; flex-wrap: wrap; gap: 9px; }
+  
+  .pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 13px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  
+  .pill:hover { border-color: var(--series); background: var(--surface-2); }
+  .pill span { color: var(--ink-3); font-variant-numeric: tabular-nums; font-size: 12px; }
+  
+  /* ---------------- caveat note ---------------- */
+  
+  .note {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 15px;
+    color: var(--ink-2);
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin: 16px 0 0;
+  }
+  
+  .note b { color: var(--ink); font-weight: 600; }
+  
+  /* ---------------- footer ---------------- */
+  
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 22px 28px;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  
+  footer a { color: var(--ink-2); text-decoration: none; }
+  footer a:hover { color: var(--series); }
+  
+  /* ---------------- laptop ---------------- */
+  
+  @media (max-width: 1180px) {
+    .col-4, .col-5, .col-7, .col-8 { grid-column: span 6; }
+  }
+  
+  /* ---------------- tablet: sidebar becomes a top bar ---------------- */
+  
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+  
+    .sidebar {
+      position: static;
+      height: auto;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+    }
+  
+    .sidebar .brand { padding: 14px 0; border-bottom: none; flex: none; }
+    .sidebar .brand small { display: none; }
+  
+    .side-nav {
+      padding: 0;
+      display: flex;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      margin-left: 6px;
+    }
+  
+    .side-nav::-webkit-scrollbar { display: none; }
+    .side-nav a { padding: 8px 11px; font-size: 13px; }
+    .side-nav a.active { box-shadow: inset 0 -2px 0 var(--series); }
+  
+    .side-foot { margin-top: 0; margin-left: auto; padding: 0; border-top: none; flex: none; }
+    .theme-toggle { padding: 7px 11px; }
+  
+    .topbar { padding: 17px 18px; }
+    .topbar h1 { font-size: 21px; }
+  
+    main { padding: 18px 18px 48px; }
+    footer { padding: 20px 18px; }
+  
+    .col-4, .col-5, .col-6, .col-7, .col-8 { grid-column: span 12; }
+  }
+  
+  /* ---------------- phone ---------------- */
+  
+  @media (max-width: 620px) {
+    .sidebar { padding: 0 12px; }
+    .sidebar .brand { font-size: 15px; gap: 9px; }
+    .sidebar .brand .mark { width: 22px; height: 22px; border-radius: 7px; }
+    .side-nav a span { display: none; }   /* icons only, so the row fits */
+    .side-nav a { padding: 9px 10px; }
+    .theme-toggle span { display: none; }
+  
+    .topbar { padding: 15px 14px; }
+    .topbar h1 { font-size: 19px; }
+    .topbar .stamp { margin-left: 0; width: 100%; }
+  
+    main { padding: 16px 14px 44px; }
+    .grid { gap: 12px; }
+  
+    .card { padding: 16px 15px; border-radius: 12px; }
+    .table-wrap { margin: 0 -15px -16px; padding: 0 4px; }
+  
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .kpi { padding: 14px 14px; }
+    .kpi .value { font-size: 25px; }
+    .kpi .label { font-size: 10px; }
+  
+    .bar-row { grid-template-columns: minmax(0, 88px) minmax(0, 1fr) minmax(0, 44px); gap: 9px; }
+    .vbars { height: 150px; gap: 7px; }
+    .donut { width: 118px; height: 118px; }
+    .donut::after { inset: 22px; }
+    .donut-wrap { gap: 16px; }
+  
+    footer { padding: 18px 14px; }
+  }
+  
+  @media (max-width: 380px) {
+    .kpi .value { font-size: 22px; }
+    .bar-row { grid-template-columns: minmax(0, 74px) minmax(0, 1fr) minmax(0, 40px); }
+  }
+  

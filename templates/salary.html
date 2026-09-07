@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — Salary{% endblock %}
+{% block heading %}Salary{% endblock %}
+
+{% block content %}
+
+<p class="lede">
+  Only {{ kpis.jobs_with_salary | num }} of {{ kpis.total_jobs | num }} postings
+  ({{ pct(kpis.jobs_with_salary, kpis.total_jobs) }}) state a salary. Every figure below
+  shows how many postings it is based on — averages over a small sample move a lot, and
+  hiding the sample size would hide that.
+</p>
+
+<div class="grid">
+
+  <div class="col-12">
+    <div class="card">
+      <h2>By role</h2>
+      <p class="sub">Average advertised range · roles with at least 10 disclosed salaries</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th class="num">Avg min</th>
+              <th class="num">Avg max</th>
+              <th class="num">Sample</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in by_role %}
+            <tr>
+              <td class="strong">{{ r.search_role }}</td>
+              <td class="num">₹{{ r.avg_min | inr }}</td>
+              <td class="num">₹{{ r.avg_max | inr }}</td>
+              <td class="num">{{ r.with_salary }} / {{ r.total_jobs | num }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6">
+    <div class="card">
+      <h2>By skill</h2>
+      <p class="sub">Postings mentioning the skill that also state a salary</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Skill</th><th class="num">Avg max</th><th class="num">Sample</th></tr>
+          </thead>
+          <tbody>
+            {% for s in by_skill %}
+            <tr>
+              <td class="strong">{{ s.skill_name }}</td>
+              <td class="num">₹{{ s.avg_max | inr }}</td>
+              <td class="num">{{ s.with_salary }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6">
+    <div class="card">
+      <h2>By city</h2>
+      <p class="sub">Cities with at least 10 disclosed salaries</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>City</th><th class="num">Avg max</th><th class="num">Sample</th></tr>
+          </thead>
+          <tbody>
+            {% for l in by_location %}
+            <tr>
+              <td class="strong">{{ l.location }}</td>
+              <td class="num">₹{{ l.avg_max | inr }}</td>
+              <td class="num">{{ l.with_salary }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <p class="note">
+      Figures are what employers <b>advertised</b>, not what was paid, and Adzuna flags
+      none of these as its own estimate. Roles and cities below the 10-posting threshold
+      are left out rather than shown with a number nobody should trust.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

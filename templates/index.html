@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — Overview{% endblock %}
+{% block heading %}Overview{% endblock %}
+
+{% block content %}
+
+<p class="lede">
+  {{ kpis.total_jobs | num }} live postings across {{ kpis.total_roles }} roles,
+  pulled from Adzuna every night and broken down by skill, salary, city and company.
+</p>
+
+<div class="grid">
+
+  <div class="col-12">
+    <div class="kpis">
+      <div class="kpi"><div class="value">{{ kpis.total_jobs | num }}</div><div class="label">Postings</div></div>
+      <div class="kpi"><div class="value">{{ kpis.total_companies | num }}</div><div class="label">Companies</div></div>
+      <div class="kpi"><div class="value">{{ kpis.total_roles }}</div><div class="label">Roles</div></div>
+      <div class="kpi"><div class="value">{{ kpis.total_skills }}</div><div class="label">Skills</div></div>
+      <div class="kpi"><div class="value">{{ salary_pct }}</div><div class="label">Show salary</div></div>
+    </div>
+  </div>
+
+  <div class="col-7">
+    <div class="card">
+      <h2>Most in-demand skills</h2>
+      <p class="sub">Postings mentioning each skill</p>
+      <div class="bars">
+        {% for s in top_skills %}
+        <div class="bar-row" title="{{ s.skill_name }} — {{ s.job_count | num }} postings">
+          <span class="bar-label">{{ s.skill_name }}</span>
+          <span class="bar-track"><span class="bar-fill" style="--w: {{ s.width }}%"></span></span>
+          <span class="bar-value">{{ s.job_count | num }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-5">
+    <div class="card">
+      <h2>Salary disclosure</h2>
+      <p class="sub">How many postings state a figure</p>
+      <div class="donut-wrap">
+        <div class="donut" style="--stops: {{ salary_stops }}">
+          <div class="center"><b>{{ salary_pct }}</b><span>disclosed</span></div>
+        </div>
+        <div class="legend">
+          {% for r in salary_split %}
+          <div>
+            <i style="--dot: var(--c{{ r.slot }})"></i>
+            <span class="nm">{{ r.category }}</span>
+            <span class="vl">{{ r.job_count | num }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <p class="note">
+        Every salary figure on this site is computed over the disclosed subset and
+        shows the number of postings behind it.
+      </p>
+    </div>
+  </div>
+
+  <div class="col-7">
+    <div class="card">
+      <h2>Where the jobs are</h2>
+      <p class="sub">Postings by city</p>
+      <div class="vbars">
+        {% for c in cities %}
+        <div class="vbar" title="{{ c.location }} — {{ c.job_count | num }} postings">
+          <div class="cap">{{ c.job_count | num }}</div>
+          <div class="fill" style="--h: {{ c.width }}%"></div>
+          <div class="name">{{ c.location.split(',')[0] }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="note">
+        A further <b>{{ unspecified | num }}</b> postings name no city — Adzuna returns
+        just “India” for those, so they are excluded rather than topping the chart.
+      </p>
+    </div>
+  </div>
+
+  <div class="col-5">
+    <div class="card">
+      <h2>Job categories</h2>
+      <p class="sub">Adzuna's own classification</p>
+      <div class="donut-wrap">
+        <div class="donut" style="--stops: {{ category_stops }}">
+          <div class="center"><b>{{ categories | length }}</b><span>categories</span></div>
+        </div>
+        <div class="legend">
+          {% for c in categories %}
+          <div>
+            <i style="--dot: var(--c{{ c.slot }})"></i>
+            <span class="nm">{{ c.category.replace(' Jobs', '') }}</span>
+            <span class="vl">{{ c.share }}%</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <h2>Companies hiring most</h2>
+      <p class="sub">By number of open postings</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th class="num">#</th><th>Company</th><th class="num">Postings</th><th class="num">Distinct roles</th></tr>
+          </thead>
+          <tbody>
+            {% for c in top_companies %}
+            <tr>
+              <td class="num">{{ loop.index }}</td>
+              <td class="strong">{{ c.name }}</td>
+              <td class="num">{{ c.job_count | num }}</td>
+              <td class="num">{{ c.role_count }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

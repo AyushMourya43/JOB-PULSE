@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — {{ role }}{% endblock %}
+{% block heading %}{{ role | title }}{% endblock %}
+
+{% block content %}
+
+<p class="lede">
+  <a href="roles.html">← All roles</a>
+</p>
+
+<div class="grid">
+
+  <div class="col-12">
+    <div class="kpis">
+      <div class="kpi">
+        <div class="value">{{ summary.total_jobs | num }}</div>
+        <div class="label">Postings</div>
+      </div>
+      <div class="kpi">
+        <div class="value">{{ summary.companies | num }}</div>
+        <div class="label">Companies</div>
+      </div>
+      <div class="kpi">
+        <div class="value">₹{{ summary.avg_max | inr }}</div>
+        <div class="label">Avg advertised max</div>
+      </div>
+      <div class="kpi">
+        <div class="value">{{ pct(summary.with_salary, summary.total_jobs) }}</div>
+        <div class="label">Show salary</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6">
+    <div class="card">
+      <h2>Most asked-for skills</h2>
+      <p class="sub">Within {{ role }} postings</p>
+      <div class="bars">
+        {% for s in skills %}
+        <div class="bar-row" title="{{ s.skill_name }} — {{ s.job_count | num }} postings">
+          <span class="bar-label">{{ s.skill_name }}</span>
+          <span class="bar-track"><span class="bar-fill" style="--w: {{ s.width }}%"></span></span>
+          <span class="bar-value">{{ s.job_count | num }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6">
+    <div class="card">
+      <h2>Top cities</h2>
+      <p class="sub">Within {{ role }} postings</p>
+      <div class="vbars">
+        {% for l in locations %}
+        <div class="vbar" title="{{ l.location }} — {{ l.job_count | num }} postings">
+          <div class="cap">{{ l.job_count | num }}</div>
+          <div class="fill" style="--h: {{ l.width }}%"></div>
+          <div class="name">{{ l.location.split(',')[0] }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <h2>Newest postings</h2>
+      <p class="sub">Most recently posted, linking back to the original ad</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th><th>Company</th><th>City</th>
+              <th class="num">Salary</th><th class="num">Posted</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for j in jobs %}
+            <tr>
+              <td class="strong">{{ j.title }}</td>
+              <td>{{ j.company }}</td>
+              <td>{{ j.location.split(',')[0] if j.location else '—' }}</td>
+              <td class="num">{% if j.salary_max %}₹{{ j.salary_max | inr }}{% else %}—{% endif %}</td>
+              <td class="num">{{ j.posted_date.strftime('%d %b') if j.posted_date else '—' }}</td>
+              <td><a href="{{ j.redirect_url }}" rel="noopener nofollow">Open</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

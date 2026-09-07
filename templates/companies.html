@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — Companies{% endblock %}
+{% block heading %}Companies{% endblock %}
+
+{% block content %}
+
+<p class="lede">
+  The 50 companies with the most open postings, out of
+  {{ kpis.total_companies | num }} tracked.
+</p>
+
+<div class="grid">
+
+  <div class="col-12">
+    <div class="card">
+      <h2>Most postings</h2>
+      <p class="sub">Ranked by open roles right now</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>Company</th>
+              <th class="num">Postings</th>
+              <th class="num">Distinct roles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in companies %}
+            <tr>
+              <td class="num">{{ loop.index }}</td>
+              <td class="strong">{{ c.name }}</td>
+              <td class="num">{{ c.job_count | num }}</td>
+              <td class="num">{{ c.role_count }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <p class="note">
+      Around <b>225 postings per run</b> carry no company name — mostly staffing agencies
+      that do not disclose the hiring company. They are skipped rather than loaded under a
+      placeholder, so they are absent from this ranking.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

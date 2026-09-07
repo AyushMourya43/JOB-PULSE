@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — Roles{% endblock %}
+{% block heading %}Roles{% endblock %}
+
+{% block content %}
+
+<p class="lede">
+  {{ roles | length }} search terms tracked daily — 20 technical and 10 non-technical.
+  Open any role for its skills, pay, cities and newest postings.
+</p>
+
+<div class="grid">
+  <div class="col-12">
+    <div class="card">
+      <h2>All tracked roles</h2>
+      <p class="sub">Number shown is current postings</p>
+      <div class="pills">
+        {% for r in roles %}
+        <a class="pill" href="role-{{ r.search_role | slug }}.html">
+          {{ r.search_role }} <span>{{ r.job_count | num }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

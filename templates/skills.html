@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}JobPulse — Skills{% endblock %}
+{% block heading %}Skills{% endblock %}
+
+{% block content %}
+
+<p class="lede">
+  Skills are matched against a curated list of {{ kpis.total_skills }} terms using
+  word-boundary matching on each posting's description.
+</p>
+
+<div class="grid">
+
+  <div class="col-7">
+    <div class="card">
+      <h2>Top 25 skills</h2>
+      <p class="sub">Postings mentioning each skill</p>
+      <div class="bars">
+        {% for s in top_skills %}
+        <div class="bar-row" title="{{ s.skill_name }} — {{ s.job_count | num }} postings">
+          <span class="bar-label">{{ s.skill_name }}</span>
+          <span class="bar-track"><span class="bar-fill" style="--w: {{ s.width }}%"></span></span>
+          <span class="bar-value">{{ s.job_count | num }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-5">
+    <div class="card">
+      <h2>Skills that travel together</h2>
+      <p class="sub">Pairs appearing in the same posting</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Pair</th><th class="num">Postings</th></tr>
+          </thead>
+          <tbody>
+            {% for p in pairs %}
+            <tr>
+              <td class="strong">{{ p.skill_1 }} + {{ p.skill_2 }}</td>
+              <td class="num">{{ p.pair_count | num }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <p class="note">
+      Adzuna truncates every description at <b>500 characters</b>, so extraction only
+      sees the opening of each posting. These counts are a floor, not a full count.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

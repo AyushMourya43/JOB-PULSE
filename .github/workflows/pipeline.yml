@@ -11,10 +11,33 @@ on:
         description: "Adzuna pages per role"
         default: "5"
 
+# Required by the Pages deployment action
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two runs publish at the same time
+concurrency:
+  group: jobpulse-pipeline
+  cancel-in-progress: false
+
 jobs:
   ingest:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    env:
+      ADZUNA_BASE_URL: https://api.adzuna.com/v1/api/jobs
+      ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+      ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+      REQUEST_TIMEOUT: "30"
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: "5432"
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_SSLMODE: require
 
     steps:
       - uses: actions/checkout@v4
@@ -27,15 +50,27 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Run pipeline
-        env:
-          ADZUNA_BASE_URL: https://api.adzuna.com/v1/api/jobs
-          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
-          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
-          REQUEST_TIMEOUT: "30"
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: "5432"
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_SSLMODE: require
         run: python run.py --max-pages ${{ inputs.max_pages || 5 }}
+
+      # The dashboard is rendered from whatever the pipeline just loaded,
+      # so the published site and the database can never disagree.
+      - name: Build dashboard
+        run: python -m src.report.build
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: ingest
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
